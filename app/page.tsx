@@ -9,10 +9,10 @@ export default function Home() {
       <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
         <div className="mx-auto max-w-3xl px-4 py-6">
           <h1 className="text-xl font-semibold tracking-tight">
-            読んだ論文メモ
+            論文読み with MoriX
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            要約を追加するたびに一覧に反映されます
+            3D深層学習中心
           </p>
         </div>
       </header>
