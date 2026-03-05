@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "論文読み with MoriX",
-  description: "論文の学習と要約",
+  description: "論文を読んでまとめるサイト",
 };
 
 export default function RootLayout({

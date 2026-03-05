@@ -48,7 +48,7 @@ export default async function PaperPage({ params }: Props) {
               rel="noopener noreferrer"
               className="mt-2 inline-block text-sm text-blue-600 dark:text-blue-400 hover:underline"
             >
-              論文リンク（PDFなど）
+              論文リンク
             </a>
           )}
           {meta.tags?.length > 0 && (

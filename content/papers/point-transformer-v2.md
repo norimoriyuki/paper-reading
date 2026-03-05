@@ -12,8 +12,6 @@ editor: "morix"
 
 # 概要
 
-Point Transformer (V1) を前提に、本論文は **Point Transformer V2** として、V1 の限界を補う 3 つの設計を提案している。
-
 **提案の新規性**
 
 1. **Grouped Vector Attention**  
