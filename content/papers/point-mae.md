@@ -2,7 +2,7 @@
 title: "Masked Autoencoders for Point Cloud Self-supervised Learning"
 authors: ["Yatian Pang", "Wenxiao Wang", "Francis E.H. Tay", "Wei Liu", "Yonghong Tian", "Li Yuan"]
 year: 2022
-venue: ""
+venue: "ECVA"
 url: "https://arxiv.org/abs/2203.06604"
 tags: ["3D", "Point Cloud", "Self-supervised Learning", "Masked Autoencoder", "Transformer", "Pre-training"]
 readAt: "2026-03-05"
@@ -74,7 +74,7 @@ editor: "morix"
   - **(4) パートセグメンテーション**  
     **タスク**: 点群の **パートセグメンテーション**（各点にパートラベルを付与。ShapeNet Part 等が想定される）。  
     **評価指標**: **mean IoU（mIoU）**。事前学習済み Point-MAE をバックボーンにした場合、ベースライン（事前学習なしなど）から **約 1% mIoU 向上** を報告。  
-- **Ablation（Sec. 4.3）**  
+- **Ablation**  
   - **マスク率**: マスク率を変えて事前学習し、ダウンストリームの精度を比較。**60%–80%** の高マスク率が有効であることを示している。  
   - **マスクトークンをデコーダに移す効果**: マスクトークンをエンコーダに入れる場合と **デコーダのみで扱う場合（Shifting mask tokens）** を比較。デコーダに移すことで **(i) 位置情報の早期漏れを防ぎ** 表現学習が良くなること、**(ii) エンコーダの入力トークン数が減り** 計算量が削減されることを、再構成品質やダウンストリーム精度で分析している。
 
