@@ -12,7 +12,7 @@ export default function Home() {
             論文読み with MoriX
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            3D深層学習中心
+            3D深層学習中心に
           </p>
         </div>
       </header>
@@ -46,7 +46,7 @@ export default function Home() {
                     {paper.meta.readAt && (
                       <>
                         <span>·</span>
-                        <span>読了: {paper.meta.readAt}</span>
+                        <span>読んだ日: {paper.meta.readAt}</span>
                       </>
                     )}
                     {paper.meta.editor && (

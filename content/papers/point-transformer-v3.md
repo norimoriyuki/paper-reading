@@ -108,64 +108,38 @@ $$
 
 ![](/papers/point-transformer-v3/patch_grouping.png)
 
-1. **入力**: 各点の特徴ベクトル `feat[i]`（元の点インデックス $i$）、シリアライズマッピング `serial_map`（`serial_map[j]` = 曲線順で $j$ 番目に来る点の元インデックス）、**パッチサイズ** $S$（例: 64, 256）。
-2. **曲線順の特徴列**: 並べ替えだけなら `feat_serial[j] := feat[serial_map[j]]`。実装ではこの並べ替えと後述のパディングを **1 回のインデックス操作** にまとめる（論文 Fig.4）。
-3. **パディング**: 点総数 $N$ が $S$ で割り切れないとき、列の長さを $S$ の倍数になるまで **隣接から点を借りて** パディングする。例: 長さを `P = ceil(N / S) * S` にし、$j \ge N$ の位置には「隣接パッチの点」のインデックスを詰める（同じ点を複数回参照してもよい）。これで全パッチが長さ $S$ になる。
-4. **パッチへの分割**: パッチ数 $M = P / S$。パッチ $m$ に属する列インデックスは $mS,\, mS+1,\, \ldots,\, (m+1)S - 1$。各パッチは形状 $(S, C)$ の特徴ブロックとして扱う。
+- シリアライズされた点列を、**パッチサイズ**（例: 64 や 256）で区切った **非重複のパッチ** に分ける。つまり、列の 1 番目〜$S$ 番目がパッチ 1、$S+1$ 番目〜$2S$ 番目がパッチ 2、… とする。
+- 点総数がパッチサイズで割り切れない場合は、**隣接パッチから点を借りてパディング** し、全パッチが同じ長さになるようにする。パッチごとの Attention を均一な形状で実行可能に。
 
-疑似コード（パッチグループ化＋パッチ内 Attention の入力を用意）:
 
-```
-function BuildPatchIndices(N, S, serial_map):
-    P := ceil(N / S) * S
-    pad_len := P - N
-    // 曲線順インデックス: [0..N-1] は serial_map で元インデックスに変換して特徴を取る
-    // パディング: 末尾に「借りた」インデックスを追加（例: 右隣から借りるなら serial_map[N-1] を pad_len 回）
-    patch_indices := 2次元配列, 形状 (P/S, S)
-    for m := 0 to (P/S)-1:
-        for s := 0 to S-1:
-            linear_idx := m*S + s
-            if linear_idx < N:
-                patch_indices[m][s] := serial_map[linear_idx]
-            else:
-                patch_indices[m][s] := serial_map[N-1]  // 右端から借りる（他にも取り方あり）
-    return patch_indices   // 各パッチが (S,) の「元点インデックス」列
-```
+パッチ内だけでは受容野が列の一部に限られるため、**パッチ間で情報をやりとりする仕組み** が必須となる→パッチ間相互作用
 
-この `patch_indices[m]` で `feat[patch_indices[m][s]]` を集めれば、パッチ $m$ の特徴 $(S, C)$ が得られる。並べ替えとパディングを 1 回のインデックス操作で行う実装では、`patch_indices` を直接「パッチ × 位置 → 元インデックス」の 2 次元インデックスとして保持する。
+### Attention 
 
-### Attention の見直し（窓・ドット積）
-
-V2 までは点群の「非構造」性に合わせて、近傍 Attention や Vector Attention を使っていた。PTv3 ではシリアライズにより **列としての構造** が得られるため、画像と同様の **窓 Attention（パッチ内だけ見る）＋ドット積 Attention** に切り替える。
+近傍 Attention や Vector Attention を使うのをやめて、画像と同様のAttentionに切り替える。
 
 **パッチ内 Self-Attention（実装）**: 各パッチを長さ $S$ の系列として、標準的な **スケール付きドット積 Attention** を適用する。パッチ $m$ の特徴を $\mathbf{X}_m \in \mathbb{R}^{S \times C}$ とすると、$Q = \mathbf{X}_m W_Q$、$K = \mathbf{X}_m W_K$、$V = \mathbf{X}_m W_V$（$W_Q, W_K, W_V \in \mathbb{R}^{C \times d}$）を計算し、
 $$
 \text{Attention}(\mathbf{X}_m) = \text{softmax}\left(\frac{Q K^\top}{\sqrt{d}}\right) V.
 $$
-パッチ内のみで Attention するので、$QK^\top$ は $(S, S)$ となり、メモリ・計算量はパッチ数に比例してスケールする。RPE は使わない（位置・文脈は事前のスパース畳み込みで特徴に含めている）。実装では、全パッチをバッチ次元でまとめて $(M, S, C)$ のテンソルにし、$M$ をバッチ次元として 1 回で $(S, S)$ の Attention を $M$ 回分計算する。
-
-パッチ内だけでは受容野が列の一部に限られるため、**パッチ間で情報をやりとりする仕組み** が必須となる。それを担うのが以下のパッチ間相互作用である。
 
 ### パッチ間相互作用
 
-異なるパッチに属する点同士が情報を交換するための仕組み。論文で検討されている主な方式は次のとおりである。
+異なるパッチに属する点同士が情報を交換するための仕組み
 
-- **Shift Dilation**: パッチの切り方を **ステップ幅でずらす**。通常は「連続する $S$ 個」を 1 パッチにするが、代わりに「列上で $D$ 個おきに $S$ 個取る」ようにする。例: ステップ $D=2$ なら、パッチ 0 は列インデックス 0, 2, 4, …, 2(S-1)、パッチ 1 は 1, 3, 5, …。実装では、列を `[0,1,...,N-1]` と見て、`group_id = linear_idx % D`, `pos_in_group = linear_idx // D` のように再インデックスし、`(group_id, pos_in_group)` でパッチを定義する（または `linear_idx → (patch_id, pos)` の写像を変える）。これにより隣接だけでなく離れた点も同じパッチに入り、受容野が広がる。
-- **Shift Patch**: 画像の shift-window と同様に、**列をシフトしてからパッチに切る**。層 $l$ では `shift = (l % S) * offset` のようなオフセットを加え、`effective_idx = (linear_idx + shift) % N` で並べ替えてから同じパッチ分割を行う。層ごとにシフト量を変えることで、異なる相対位置の組み合わせが Attention に含まれる。
-- **Shift Order**: **層ごとに異なるシリアライズパターン**（Z-order / Hilbert / Trans Z-order / Trans Hilbert の 4 種）を割り当てる。実装では、4 種類のマッピング `serial_map_0, serial_map_1, serial_map_2, serial_map_3` を事前に用意し、層 $l$ では `serial_map = serial_map_{l % 4}` を使ってパッチグループ化する。異なる曲線で異なる局所関係が強調され、層を重ねることで多様な空間関係を捉えられる。論文では **Shift Order などが有効** と報告されている。
-- **Shuffle Order**: 上記 4 パターンの **適用順をランダムにシャッフル** した列（例: [2,0,3,1]）をエポックまたは層ブロックごとに決め、その順で層に割り当てる。論文の実験では Shift Order（固定巡回）が採用されている。
+![](/papers/point-transformer-v3/patch_interaction.png)
 
-**1 層分の Serialized Attention の疑似コード（Shift Order の場合）**:
-
-```
-function SerializedAttentionLayer(feat, layer_id, serial_maps, patch_size):
-    serial_map := serial_maps[layer_id % 4]
-    patch_indices := BuildPatchIndices(N, patch_size, serial_map)
-    X := feat を patch_indices に従い (M, S, C) に集める
-    Y := PatchWiseSelfAttention(X)   // (M, S, C) の各 m で Q,K,V から softmax(QK^T/sqrt(d))V
-    feat_out := 元の点インデックス順に Y を散らす（逆マッピング）
-    return feat_out + Residual(feat)  // 残差接続など
-```
+- **Shift Dilation**: パッチの切り方を **ステップ幅でずらす**。例えば「1 番目から 64 個」「65 番目から 
+64 個」ではなく、「1, 65, 129, … 番目から 64 個」のように間隔を空けてグループ化する。これにより、隣接パッチ
+だけでなく、離れた位置の点も同じパッチに含まれ、受容野が広がる。
+- **Shift Patch**: 画像の shift-window と同様に、**列をシフトしてからパッチに切る**。層ごとにシフト量を
+変えることで、異なる相対位置の組み合わせが Attention に含まれる。
+- **Shift Order**: **層ごとに異なるシリアライズパターン**（Z-order / Hilbert / Trans Z-order / 
+Trans Hilbert）を割り当てる。例えば 1 層目は Z-order、2 層目は Hilbert、… と巡回させる。異なる曲線で異な
+る局所関係が強調されるため、層を重ねることで多様な空間関係を捉えられる。論文では **Shift Order などが有効** 
+と報告されている。
+- **Shuffle Order**: 上記 4 パターンの **適用順をランダムにシャッフル** してから各層に割り当てる。順序の
+多様性を増すが、論文の実験では Shift Order 等の固定方針が採用されている。
 
 これらにより、パッチ内だけの狭い受容野の制限を補い、シリアライズ＋パッチ Attention で点群全体の文脈を扱えるようにしている。
 
@@ -173,6 +147,8 @@ function SerializedAttentionLayer(feat, layer_id, serial_maps, patch_size):
 
 - **KNN の廃止**: 近傍を「シリアライズされた列の上での連続したパッチ」で定義し、直列化近傍マッピングで効率化。
 - **相対位置符号化（RPE）の廃止**: RPE をやめ、代わりに **事前のスパース畳み込み層**で位置・文脈を入れる。  
-  **スパース畳み込みに該当する処理**: ネットワークの**入り口**にある **stem（ステム）** 部分である。入力は点群をボクセル化したスパースな 3D グリッド。ここで「点が存在するボクセル（とその近傍）」だけを有効位置として **3D 畳み込み**をかける層を数段重ねる。実装では Minkowski Engine などの **SparseConvolution**（または MinkowskiConvolution）がその 1 層 1 層に対応する。つまり「点群 → ボクセル化 → 有効ボクセルだけに 3D カーネルを適用して特徴マップを得る」一連のブロックがスパース畳み込みであり、その出力特徴を Transformer の入力とする。Attention 内の RPE は使わず、この stem で位置・局所文脈を特徴に載せる。
-- **注意機構の簡略化**: shift-window や近傍の複雑な相互作用をやめ、シリアライズされた点群向けのパッチ注意＋パッチ間相互作用に統一。
+- **Attentionの簡略化**: shift-window や近傍の複雑な相互作用をやめ、シリアライズされた点群向けのパッチ注意＋パッチ間相互作用に統一。
 
+# メモ
+Sparse Convを使っているらしいが、論文内では詳しい記述はないので勉強したほうがよさそう。
+位置関係はSparse Convのstemで入れているらしい。
