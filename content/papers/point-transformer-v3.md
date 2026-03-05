@@ -5,7 +5,7 @@ year: 2024
 venue: "CVPR"
 url: "https://arxiv.org/abs/2312.10035"
 tags: ["3D", "Point Cloud", "Transformer", "Self-Attention", "Semantic Segmentation"]
-readAt: "2026-03-04"
+readAt: "2026-03-05"
 oneLiner: "Attention の細かい工夫よりスケールとシンプルさを優先"
 editor: "morix"
 ---
