@@ -1,0 +1,45 @@
+---
+description: 論文要約の Markdown と Frontmatter の形式（content/papers）
+globs: content/papers/**/*.md
+alwaysApply: false
+---
+
+# 論文要約の形式
+
+## ファイルと URL
+
+- **1論文1ファイル**: `content/papers/<slug>.md`
+- **slug**: ファイル名の `.md` を除いた部分。URL は `/papers/<slug>`。英数字とハイフン推奨。
+
+## Frontmatter（必須・推奨）
+
+`lib/papers.ts` の `PaperMeta` に合わせる。
+
+| 項目 | 必須 | 説明 |
+|------|------|------|
+| title | ✅ | 論文タイトル |
+| authors | ✅ | 著者リスト `["Vaswani et al."]` |
+| year | ✅ | 発表年（数値） |
+| venue | ✅ | 学会・ジャーナル名 |
+| url | - | 論文リンク（arXiv 等） |
+| tags | ✅ | タグ配列 |
+| readAt | ✅ | 読了日 `"YYYY-MM-DD"`。一覧の並び順に使用 |
+| oneLiner | ✅ | 1行要約 |
+| editor | - | ページ制作者 |
+
+## 本文
+
+- 見出しとマークダウンで自由に要約。`# 概要` から始めることを推奨。
+- 数式は `$...$` / `$$...$$` で記述。
+
+## 図
+
+- **配置**: `public/papers/<slug>/` に画像を置く。
+- **記述**: 絶対パスを使う。相対パス `./` は使わない。
+
+```md
+✅ ![キャプション](/papers/<slug>/fig1.png)
+❌ ![キャプション](./fig1.png)
+```
+
+新規論文を追加するときは `content/papers/README.md` のテンプレートをコピーして使う。

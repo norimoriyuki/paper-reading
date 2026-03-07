@@ -6,7 +6,7 @@ venue: "ECVA"
 url: "https://arxiv.org/abs/2203.06604"
 tags: ["3D", "Point Cloud", "Self-supervised Learning", "Masked Autoencoder", "Transformer", "Pre-training"]
 readAt: "2026-03-05"
-oneLiner: "点群をパッチに分けて高マスク率でMAE、PointBERTの手法のTransformerを使用"
+oneLiner: "点群をパッチに分けて高マスク率で、PointBERTの手法のTransformer で再構成"
 editor: "morix"
 ---
 

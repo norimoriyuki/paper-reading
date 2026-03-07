@@ -1,0 +1,11 @@
+---
+description: このリポジトリの概要（常時適用）
+alwaysApply: true
+---
+
+# paper プロジェクト
+
+- **目的**: 読んだ論文の要約を一覧・詳細表示する Next.js サイト。
+- **論文データ**: `content/papers/*.md`（1論文1ファイル、Frontmatter + 本文）。一覧・取得は `lib/papers.ts`。
+- **表示**: トップが一覧、`/papers/[slug]` が各論文の要約ページ。画像は `public/papers/<slug>/` に配置し、本文では `/papers/<slug>/ファイル名.png` で参照。
+- 論文要約の形式や図の書き方は `content/papers/README.md` と `docs/FIGURES.md` に従う。Cursor ルールは `.cursor/rules/` の `.mdc` を参照。
