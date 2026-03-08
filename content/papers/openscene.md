@@ -6,7 +6,7 @@ venue: "CVPR"
 url: "https://arxiv.org/abs/2211.15654"
 tags: ["3D", "Point Cloud", "Open-vocabulary", "CLIP", "Semantic Segmentation", "Zero-shot", "Scene Understanding"]
 readAt: "2026-03-08"
-oneLiner: "3D 点を CLIP 空間に写し、オープン語彙・ゼロショットでシーン理解"
+oneLiner: "3D 点を CLIP 空間に写像"
 editor: "morix"
 ---
 
@@ -125,7 +125,7 @@ Matterport3D で、**出現頻度の高い順に K クラス**（K = 21, 40, 80,
 
 ![](../../public/papers/openscene/2026-03-08-19-03-09.png)
 
-- **Ensemble の振る舞い（Table 5）**: セマンティックセグメンテーションで、各点に 2D と 3D のどちらの特徴が選ばれたかを Matterport3D で集計。**約 70% が 3D 特徴**で、3D distillation の寄与が大きい。一方、クラス数 K が増えるほど 2D が選ばれる割合が増える（K=21 で 28.56%、K=160 で 32.46%）。ロングテールのクラスは物体が小さい・事例が少ないことが多く、2D 特徴が効いていると解釈される。
+- **Ensemble の振る舞い**: セマンティックセグメンテーションで、各点に 2D と 3D のどちらの特徴が選ばれたかを Matterport3D で集計。**約 70% が 3D 特徴**で、3D distillation の寄与が大きい。一方、クラス数 K が増えるほど 2D が選ばれる割合が増える（K=21 で 28.56%、K=160 で 32.46%）。ロングテールのクラスは物体が小さい・事例が少ないことが多く、2D 特徴が効いていると解釈される。
 
 # 限界と今後の課題
 
