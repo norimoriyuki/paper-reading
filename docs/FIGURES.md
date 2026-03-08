@@ -70,6 +70,41 @@ Encoder は 6 層で...
 
 ---
 
+---
+
+## 画像の貼り付け（拡張機能）
+
+**Paste Image** 拡張（[mushan.vscode-paste-image](https://marketplace.visualstudio.com/items?itemName=mushan.vscode-paste-image)）を使うと、クリップボードの画像を Markdown に貼り付けたときにファイルとして保存できる。
+
+### 設定（このリポジトリ）
+
+`.vscode/settings.json` で、**編集中の論文ファイル名（スラッグ）に応じて**保存先を変えている。
+
+```json
+{
+  "pasteImage.path": "${projectRoot}/public/papers/${currentFileNameWithoutExt}"
+}
+```
+
+- `content/papers/point-bert.md` を開いた状態で貼り付け → `public/papers/point-bert/` に保存
+- `content/papers/dynamic-graph-cnn.md` を開いた状態で貼り付け → `public/papers/dynamic-graph-cnn/` に保存
+
+### 使い方
+
+1. 拡張機能 **Paste Image** をインストール（Cursor / VS Code の拡張から「Paste Image」で検索）
+2. 画像をクリップボードにコピー（スクリーンショットやブラウザなど）
+3. 論文の `.md` を開いた状態で **Ctrl+Alt+V**（Mac: **Cmd+Alt+V**）で貼り付け
+4. 画像が `public/papers/<スラッグ>/` に保存され、Markdown にパスが挿入される
+5. 挿入されるパスが相対パスや `public/...` になっている場合は、表示用の**絶対パス**に書き換える  
+   - 例: `![説明](/papers/<スラッグ>/ファイル名.png)`
+
+### 注意
+
+- 貼り付け時は **`content/papers/<slug>.md` を開いた状態**で行うこと。そうでないと別のフォルダに保存される。
+- 本文では絶対パス `/papers/<スラッグ>/ファイル名.png` を使う（上記「マークダウンでの記述方法」参照）。
+
+---
+
 ## まとめ
 
 | やること | 内容 |
