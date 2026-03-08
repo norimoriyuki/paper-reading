@@ -28,7 +28,7 @@ editor: "morix"
 
 # EdgeConv
 
-![EdgeConv のイメージ（論文 Fig. より）](/papers/dynamic-graph-cnn/2026-03-08-12-05-51.png)
+![](../../public/papers/dynamic-graph-cnn/2026-03-08-12-05-51.png)
 
 ## エッジ特徴の数式
 
