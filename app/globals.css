@@ -25,8 +25,21 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* 論文ページの数式ブロック */
+/* 論文ページの数式：途中で改行せず、式の前後で改行・横スクロール */
 .katex-display {
   margin: 1em 0;
   overflow-x: auto;
+}
+
+/* 数式内部で改行しない（ブロック・インライン共通） */
+.katex .katex-html {
+  white-space: nowrap;
+}
+
+/* インライン数式のみ：式の境界で改行、長い場合は横スクロール（ブロック内の .katex は除外） */
+.prose .katex:not(.katex-display .katex) {
+  display: inline-block;
+  overflow-x: auto;
+  max-width: 100%;
+  vertical-align: middle;
 }

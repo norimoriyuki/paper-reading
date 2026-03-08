@@ -13,3 +13,6 @@ https://arxiv.org/abs/2301.08739
 # sparse conv
 原論文
 https://openaccess.thecvf.com/content_cvpr_2018/papers/Graham_3D_Semantic_Segmentation_CVPR_2018_paper.pdf
+
+# DGCNN
+https://arxiv.org/abs/1801.07829
