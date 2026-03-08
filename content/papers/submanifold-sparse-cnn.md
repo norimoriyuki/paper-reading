@@ -6,7 +6,7 @@ venue: "CVPR"
 url: "https://openaccess.thecvf.com/content_cvpr_2018/papers/Graham_3D_Semantic_Segmentation_CVPR_2018_paper.pdf"
 tags: ["3D", "Point Cloud", "Semantic Segmentation", "Sparse Convolution", "Submanifold", "SSCN", "Voxel"]
 readAt: "2026-03-08"
-oneLiner: "スパースな3Dデータ用に活性サイトを広げない Submanifold Sparse Convolution を提案し、深いネットで高精度な3Dセマンティックセグメンテーションを実現"
+oneLiner: "活性サイトの爆発を抑えて深いネットでの点群処理を実現"
 editor: "morix"
 ---
 
